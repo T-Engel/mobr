@@ -7,8 +7,8 @@ inv_mob_in = make_mob_in(inv_comm, inv_plot_attr)
 # run analyses
 inv_mob_stats = get_mob_stats(inv_mob_in, 'group', n_perm=999)
 inv_mob_out = get_delta_stats(inv_mob_in, 'group', ref_group='uninvaded',
-                              type='discrete', log_scale=TRUE, n_perm=999,
-                              overall_p=TRUE)
+                           type='discrete', log_scale=TRUE, n_perm=999,
+                           overall_p=TRUE)
 
 cols = c(rgb(0, 37, 112, maxColorValue = 255),    # dark navy
          rgb(0, 177, 240, maxColorValue = 255),   # royal blue
