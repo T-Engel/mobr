@@ -4,16 +4,32 @@
 \alias{get_mob_stats}
 \title{Calculate sample based and group based biodiversity statistics.}
 \usage{
-get_mob_stats(mob_in, group_var, index = c("N", "S", "S_n", "S_PIE"),
-  effort_samples = NULL, effort_min = 5, extrapolate = TRUE,
-  return_NA = FALSE, rare_thres = 0.05, n_perm = 199, boot_groups = F,
-  conf_level = 0.95, cl = NULL, ...)
+get_mob_stats(
+  mob_in,
+  group_var,
+  ref_level = NULL,
+  index = c("N", "S", "S_n", "S_PIE"),
+  effort_samples = NULL,
+  effort_min = 5,
+  extrapolate = TRUE,
+  return_NA = FALSE,
+  rare_thres = 0.05,
+  n_perm = 199,
+  boot_groups = FALSE,
+  conf_level = 0.95,
+  cl = NULL,
+  ...
+)
 }
 \arguments{
 \item{mob_in}{an object of class mob_in created by make_mob_in()}
 
 \item{group_var}{String that specifies which field in \code{mob_in$env} the
 data should be grouped by}
+
+\item{ref_level}{String that defines the reference level of \code{group_var}
+to which all other groups are compared with, defaults to \code{NULL}.
+If \code{NULL} then the default contrasts of \code{group_var} are used.}
 
 \item{index}{The calculated biodiversity indices. The options are
 \itemize{
@@ -43,13 +59,13 @@ individuals then \code{effort_min} are excluded from the analysis with a
 warning. Accordingly, when \code{effort_samples} is set by the user it has
 to be higher than \code{effort_min}.}
 
-\item{extrapolate}{extrapolate    boolean which specifies if richness should be
+\item{extrapolate}{Boolean which specifies if richness should be
 extrapolated when \code{effort_samples} is larger than the number of
 individuals using the chao1 method. Defaults to TRUE.}
 
-\item{return_NA}{boolean defaults to FALSE in which the rarefaction function
+\item{return_NA}{Boolean defaults to FALSE in which the rarefaction function
 returns the observed S when \code{effort} is larger than the number of
-individuals . If set to TRUE then NA is returned. Note that this argument
+individuals. If set to TRUE then NA is returned. Note that this argument
 is only relevant when \code{extrapolate = FALSE}.}
 
 \item{rare_thres}{The threshold that determines how pct_rare is computed.
@@ -60,7 +76,7 @@ average abundance as the threshold which McGill (2011) found to have the
 best small sample behavior.}
 
 \item{n_perm}{The number of permutations to use for testing for treatment
-effects.}
+effects. Defaults to 199.}
 
 \item{boot_groups}{Use bootstrap resampling within groups to derive
 gamma-scale confidence intervals for all biodiversity indices. Default is
@@ -71,9 +87,10 @@ bootstrapped confidence intervals. Only used when \code{boot_groups =
 TRUE}.}
 
 \item{cl}{
-A cluster object created by \code{\link[parallel]{makeCluster}},
+A cluster object created by \code{\link{makeCluster}},
 or an integer to indicate number of child-processes
-(integer values are ignored on Windows) for parallel evaluations.
+(integer values are ignored on Windows) for parallel evaluations
+(see Details on performance).
 }
 
 \item{...}{
@@ -135,18 +152,20 @@ of rarity in the community. If there is a greater rarity then f_0 is expected
 to increase. This metric is calculated as \code{S_asymp - S}. This metric is less 
 correlated with S than the raw \code{S_asymp} metric. 
 
-\strong{PIE: Probability of intraspecific encounter} represents the probability that two randomly drawn individuals 
-belong to the same species. Here we use the definition of Hurlbert (1971),
-which considers sampling without replacement. PIE is closely related to the
-well-known Simpson diversity index, but the latter assumes sampling with
-replacement.
+\strong{PIE: Probability of intraspecific encounter} represents the
+probability that two randomly drawn individuals belong to the same species.
+Here we use the definition of Hurlbert (1971), which considers sampling
+without replacement. PIE is closely related to the well-known Simpson
+diversity index, but the latter assumes sampling with replacement.
 
-\strong{S_PIE: Effective number of species for PIE} represents the effective number of species derived from the
-PIE. It is calculated using the asymptotic estimator for Hill numbers of diversity order 2 (Chao et al, 2014).
-S_PIE represents the species richness of a hypothetical community with equally-abundant species
-and infinitely many individuals corresponding to the same value of PIE as the real community.
-An intuitive interpretation of S_PIE is that it corresponds to the number of
-dominant (highly abundant) species in the species pool.
+\strong{S_PIE: Effective number of species for PIE} represents the effective
+number of species derived from the PIE. It is calculated using the asymptotic
+estimator for Hill numbers of diversity order 2 (Chao et al, 2014). S_PIE
+represents the species richness of a hypothetical community with
+equally-abundant species and infinitely many individuals corresponding to the
+same value of PIE as the real community. An intuitive interpretation of S_PIE
+is that it corresponds to the number of dominant (highly abundant) species in
+the species pool.
 
 For species richness \code{S}, rarefied richness \code{S_n}, undetected
 richness \code{f_0}, and the Effective Number of Species \code{S_PIE} we also
@@ -185,20 +204,20 @@ samples occur several times in the resampled data sets.
 # a binary grouping variable (uninvaded or invaded)
 data(inv_comm)
 data(inv_plot_attr)
-inv_mob_in = make_mob_in(inv_comm, inv_plot_attr)
-inv_stats = get_mob_stats(inv_mob_in, group_var = "group",
+inv_mob_in = make_mob_in(inv_comm, inv_plot_attr, c('x', 'y'))
+inv_stats = get_mob_stats(inv_mob_in, group_var = "group", ref_level = 'uninvaded',
                           n_perm = 19, effort_samples = c(5,10))
 plot(inv_stats)
 
 \donttest{
-# Not run: 
 # parallel evaluation using the parallel package 
 # run in parallel
 library(parallel)
 cl = makeCluster(2L)
 clusterEvalQ(cl, library(mobr))
 clusterExport(cl, 'inv_mob_in')
-inv_mob_stats = get_mob_stats(inv_mob_in, 'group', n_perm=999, cl=cl)
+inv_mob_stats = get_mob_stats(inv_mob_in, 'group', ref_level = 'uninvaded',
+                              n_perm=999, cl=cl)
 
 stopCluster(cl)
 }
@@ -218,7 +237,7 @@ Alternative Parameters. Ecology, 52, 577-586.
 Jost, L. (2006) Entropy and diversity. Oikos, 113, 363-375.
 
 Jost, L. (2007) Partitioning Diversity into Independent Alpha and Beta
-Components. Ecology, 88, 2427–2439.
+Components. Ecology, 88, 2427-2439.
 
 Legendre, P. & Legendre, L.F.J. (1998) Numerical Ecology, Volume 24, 2nd
 Edition Elsevier, Amsterdam; Boston.

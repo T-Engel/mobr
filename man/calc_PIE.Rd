@@ -11,7 +11,7 @@ calc_PIE(x, ENS = FALSE)
 object in which rows represent plots and columns represent species, or 3)
 a vector which contains the abundance of each species.}
 
-\item{ENS}{boolean that determines if the effective number of species should
+\item{ENS}{Boolean that determines if the effective number of species should
 be returned or the raw PIE value. Defaults to FALSE}
 }
 \description{
@@ -48,11 +48,11 @@ calc_PIE(inv_comm, ENS=TRUE)
 }
 \references{
 Hurlbert, S. H. (1971) The nonconcept of species diversity: a critique and
- alternative parameters. Ecology 52, 577–586.
+ alternative parameters. Ecology 52, 577-586.
  
 Chao, A., Gotelli, N. J., Hsieh, T. C., Sander, E. L., Ma, K. H., Colwell, R. K., & Ellison, A. M. (2014).
  Rarefaction and extrapolation with Hill numbers: A framework for sampling and estimation in species diversity studies.
- Ecological Monographs 84(1), 45–67.
+ Ecological Monographs 84(1), 45-67.
 }
 \author{
 Dan McGlinn, Thore Engel

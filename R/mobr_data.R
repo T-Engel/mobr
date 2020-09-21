@@ -2,7 +2,7 @@
 #' @name inv_comm
 #' @aliases  inv_plot_attr
 #' @description Herbaceous plant species counts sites invaded and uninvaded by
-#'   Lonicera maackii (Amur honeysuckle) which is an invasive shrub.
+#'   \emph{Lonicera maackii} (Amur honeysuckle) which is an invasive shrub.
 #'
 #' @details \code{inv_comm} is a site-by-species matrix with individual counts.
 #'
@@ -41,8 +41,8 @@ NULL
 #' The data were adapted from Myers et al (2015).
 #'
 #'
-#' @references Myers, J. A., Chase, J. M., Crandall, R. M., & Jiménez, I.
-#' (2015). Disturbance alters beta‐diversity but not the relative importance of
+#' @references Myers, J. A., Chase, J. M., Crandall, R. M., & Jimenez, I.
+#' (2015). Disturbance alters beta-diversity but not the relative importance of
 #' community assembly mechanisms. Journal of Ecology, 103: 1291-1299.
 #' @examples
 #' data(fire_comm)

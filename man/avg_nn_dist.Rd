@@ -17,18 +17,20 @@ a vector of average distances for each sequential number
 This function computes the average distance of the next
 nearest sample for a given set of coordinates. This method
 of sampling is used  by the function \code{rarefaction}
-when building the spatial accumulation curves
+when building the spatial, sample-based rarefaction curves (sSBR).
 }
 \examples{
-# transect spatial arragnement
+# transect spatial arrangement
 transect = 1:100
 avg_nn_dist(transect)
 grid = expand.grid(1:10, 1:10)
 avg_nn_dist(grid)
+oldpar <- par(no.readonly = TRUE)
 par(mfrow=c(1,2)) 
 plot(avg_nn_dist(transect), type='o', main='transect',
      xlab='# of samples', ylab='average distance')
 # 2-D grid spatial arrangement
 plot(avg_nn_dist(grid), type='o', main='grid',
      xlab='# of samples', ylab='average distance')
+par(oldpar)
 }
