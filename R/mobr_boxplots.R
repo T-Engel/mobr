@@ -50,34 +50,28 @@ calc_chao1 = function(x) {
 
 #' Calculate probability of interspecific encounter (PIE)
 #' 
-#'  \code{calc_PIE} returns the probability of interspecific  encounter (PIE)
-#'  which is also known as Simpson's evenness index and Gini-Simpson index. For \code{ENS=TRUE},
-#'  PIE will be converted to an asymptotic effective number of species (S_PIE).
+#'  \code{calc_PIE} returns the probability of interspecific  encounter (PIE) which is also known as Simpson's evenness index and Gini-Simpson index.  For \code{ENS=TRUE},
+#'  this index will be converted to an effective number of species (S_PIE).
+#'  
+#'  Per default the aysmptotic versions of PIE and S_PIE are returned, following Hurlbert original formula (1971):
+#' \eqn{PIE = N /(N - 1) * (1 - sum(p_i^2))}, where N is the total number of individuals and \eqn{p_i} is the relative abundance
+#' of species i. This formulation uses sampling without replacement and is
+#' sometimes referred to as the bias corrected formulation of PIE. You can set \code{asymptotic=F} to use
+#' sampling with replacement instead. 
 #' 
-#' The formula of Hurlbert (1971) is used to calculate PIE:
-#' 
-#' \eqn{PIE = N /(N - 1) * (1 - p_i^2)}
-#' 
-#' where N is the total number of individuals and \eqn{p_i} is the relative abundance
-#' of species i. This formulation uses sampling without replacement and it is
-#' sometimes referred to as the bias corrected formulation of PIE.
-#' 
-#' For \code{ENS = TRUE}, S_PIE will be returned which represents the species richness of
-#' a hypothetical community with equally-abundant species and infinitely many individuals
-#' corresponding to the observed value of PIE. It is computed as
-#' \eqn{S_PIE = 1 /(1 - PIE)}, which is equal to the
-#' asymptotic estimator for Hill numbers of diversity order 2 provided by Chao et al (2014).
-#' Note that S_PIE is undefined for communities with exactly one individual per species.
+#' The effective number of species (S_PIE, i.e. \code{ENS = TRUE}) describes how many equally-abundant species a hypothetical
+#' community would have to have in order to produce the same PIE value as the true community. It is computed as
+#' \eqn{S_PIE = 1 /(1 - PIE)}. The asymptotic version of S_PIE is the same as the asymptotic estimator for Hill numbers of diversity order 2 provided by Chao et al (2014).
+#' Note that the asymptotic S_PIE is undefined for samples with only singletons (i.e. each species has an abundance of 1)
 #'  
 #' The code in this function borrows heavily from the function vegan::diversity()
-#' but computes a different quantity. The function vegan::diversity() computes
-#' PIE when sampling with replacement is assumed. The difference between the two 
-#' formulations will decrease as N becomes large. Jari Oksanen and Bob O'Hara are
+#' Unlike vegan::divesity, calc_PIE can calculate asymptotic estimates and retunrns them per default.
+#' The difference between the two formulations will decrease as N becomes large. Jari Oksanen and Bob O'Hara are
 #' the original authors of the function vegan::diversity().
 #' 
 #' @inheritParams rarefaction
-#' @param ENS Boolean that determines if the effective number of species should
-#' be returned or the raw PIE value. Defaults to FALSE
+#' @param ENS logical. Should PIE be converted into the effective number of species? Defaults to FALSE
+#' @param asymptotic logical. Should the estimate be asymptotic?
 #'
 #' @author Dan McGlinn, Thore Engel
 #' 
@@ -94,7 +88,7 @@ calc_chao1 = function(x) {
 #' data(inv_comm)
 #' calc_PIE(inv_comm)
 #' calc_PIE(inv_comm, ENS=TRUE)
-calc_PIE = function(x, ENS=FALSE) {
+calc_PIE = function(x, ENS=FALSE, asymptotic=T) {
     if ('mob_in' %in% class(x)) {
         x = x$comm
     }
@@ -117,13 +111,29 @@ calc_PIE = function(x, ENS=FALSE) {
         H = sum(x, na.rm = TRUE)
         }
     # calculate PIE without replacement (for total >= 2)
-    H = ifelse(total < 2, NA, (total / (total - 1) * (1 - H)))
+    if(asymptotic){
+      H = ifelse(total < 2, NA, (total / (total - 1) * (1 - H)))
+    } else {
+      H=1-H
+    }
+    
     if (ENS) {
         # convert to effective number of species (except for PIE == 1)
+      if(asymptotic){
         H = ifelse(H == 1 | S == total, NA, (1 / (1 - H)))
-    }     
+        
+      }else{
+        H =  1 / (1 - H)
+      }  
+      
+    }
+    
+    if(anyNA(H)) warning("NAs were produced. Check samples for low abundances.")
     return(H)
 }
+
+
+
 
 # generate a single bootstrap sample of gamma-scale biodiversity indices
 boot_sample_groups = function(abund_mat, index, effort, extrapolate, return_NA,
